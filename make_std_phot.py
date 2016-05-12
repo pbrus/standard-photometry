@@ -96,25 +96,25 @@ def plot_color(b, ax, autoscale = True, state_scl = 0, legend = False):
 
 # select new color to plot specified by button's ax (and plot)
 def select_color(click_ax, plot_ax):
-    plot_ax.col_data = click_ax.col_data
-    donebutt.label.set_text(plot_ax.col_data.buttstr)
-    plot_color(click_ax.col_data, plot_ax, state_scl=2)
+	plot_ax.col_data = click_ax.col_data
+	donebutt.label.set_text(plot_ax.col_data.buttstr)
+	plot_color(click_ax.col_data, plot_ax, state_scl=2)
 
 # zoom in ignoring rejected points
 def zoom_to_ok(plot_ax):
-    plot_color(plot_ax.col_data, plot_ax, state_scl=1)
-    
+	plot_color(plot_ax.col_data, plot_ax, state_scl=1)
+
 # reset zoom
 def zoom_to_reset(plot_ax):
-    plot_color(plot_ax.col_data, plot_ax)
+	plot_color(plot_ax.col_data, plot_ax)
 
 # reject/unreject point manually on pick
 def on_pick_point(event):
-    ax = event.mouseevent.inaxes
-    if ax.col_data.alph == ini_alph:
+	ax = event.mouseevent.inaxes
+	if ax.col_data.alph == ini_alph:
 		ax.col_data.ok[event.ind] = not ax.col_data.ok[event.ind].any() ## if any point is ok change to rejected
 		plot_color(ax.col_data, ax, autoscale=False, state_scl=2)
-    
+
 # freezes points and blocks operations on a chart
 def frozen_plot(plot_ax):
 	plot_ax.col_data.alph = fin_alph
