@@ -23,7 +23,7 @@ note:\n > std(ins_mag) is an instrumental magnitude converted into a standard ma
  > program makes output_file.log which contains parameters of conversions\n > program \
 generates PNG figures illustrating each fitting')
 argparser.add_argument('-s', help='float value of sigma for sigma clipping', dest='s', default=3)
-argparser.add_argument('-i', help='number of iterations for sigma clipping.\nIf this option \
+argparser.add_argument('-i', help='number of iterations for sigma clipping\nIf this option \
 is turned on the program\ndoesn\'t display an interactive mode', dest='it', default=0)
 args = argparser.parse_args()
 
