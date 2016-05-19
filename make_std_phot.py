@@ -2,12 +2,12 @@
 # coding=utf-8
 
 from argparse import ArgumentParser
-from argparse import RawTextHelpFormatter as tefo	# allows to use new line within argparse strings
+from argparse import RawTextHelpFormatter as tefo	# allow to use new line within argparse strings
 
 ## parse script arguments
 argparser = ArgumentParser(description='>> Conversion instrumental to standard photometry <<\n\n \
 Requires Python 2 with:\n  * pylab\n  * scipy\n  * astropy\n  * argparse\n  * matplotlib\n\n', 
-epilog='Authors: M.Kałuszyński & P.Bruś, ver. 2016-05-11', formatter_class=tefo)
+epilog='Authors: M.Kałuszyński & P.Bruś, ver. 2016-05-19', formatter_class=tefo)
 argparser.add_argument('input_file', help='with the following structure:\n \
 num_star ins_mag1 err_ins_mag1 std_mag1 err_std_mag1 ... ins_magN err_ins_magN \
 std_magN err_std_magN\n\nnote:\n > mag1 ... magN should be sorted by growing \
@@ -23,6 +23,8 @@ note:\n > std(ins_mag) is an instrumental magnitude converted into a standard ma
  > program makes output_file.log which contains parameters of conversions\n > program \
 generates PNG figures illustrating each fitting')
 argparser.add_argument('-s', help='float value of sigma for sigma clipping', dest='s', default=3)
+argparser.add_argument('-i', help='number of iterations for sigma clipping.\nIf this option \
+is turned on the program\ndoesn\'t display an interactive mode', dest='it', default=0)
 args = argparser.parse_args()
 
 from scipy import stats, odr
@@ -30,12 +32,16 @@ from pylab import *
 from astropy.stats import sigma_clip
 from matplotlib.cbook import Bunch
 from matplotlib import pyplot as plt
-#from statsmodels import api as stmo
 
 ######################################################################################################
 
 # for sigma clipping
 sigma = float(args.s)
+
+# number of iterations
+it = int(args.it)
+if it < 0:
+	it *= -1
 
 # initial and final value of alpha for points
 ini_alph = 0.6
@@ -55,11 +61,6 @@ min_err_mag = 0.0001
 
 # plots scatter chart on ax for color info Bunch c
 def plot_color(b, ax, autoscale = True, state_scl = 0, legend = False):
-	#wls = stmo.WLS(list(b.dmag[b.ok]), stmo.add_constant(list(b.icolor[b.ok]), prepend=False), weights=[1.0/i for i in list(b.err_icolor[b.ok])]).fit()
-	#b.A = wls.params[0]
-	#b.B = wls.params[1]
-	#b.N = np.sum(b.ok)
-	#b.RMS = (wls.ssr/b.N) ** 0.5
 	res = odr.ODR(odr.Data(b.icolor[b.ok], b.dmag[b.ok], 1.0/(b.err_icolor[b.ok] ** 2), 1.0/(b.err_dmag[b.ok] ** 2)), odr.Model(fun_odr), beta0=[b.a, b.b]).run()
 	b.A = res.beta[0]
 	b.B = res.beta[1]
@@ -96,26 +97,26 @@ def plot_color(b, ax, autoscale = True, state_scl = 0, legend = False):
 
 # select new color to plot specified by button's ax (and plot)
 def select_color(click_ax, plot_ax):
-    plot_ax.col_data = click_ax.col_data
-    donebutt.label.set_text(plot_ax.col_data.buttstr)
-    plot_color(click_ax.col_data, plot_ax, state_scl=2)
+	plot_ax.col_data = click_ax.col_data
+	donebutt.label.set_text(plot_ax.col_data.buttstr)
+	plot_color(click_ax.col_data, plot_ax, state_scl=2)
 
 # zoom in ignoring rejected points
 def zoom_to_ok(plot_ax):
-    plot_color(plot_ax.col_data, plot_ax, state_scl=1)
-    
+	plot_color(plot_ax.col_data, plot_ax, state_scl=1)
+
 # reset zoom
 def zoom_to_reset(plot_ax):
-    plot_color(plot_ax.col_data, plot_ax)
+	plot_color(plot_ax.col_data, plot_ax)
 
 # reject/unreject point manually on pick
 def on_pick_point(event):
-    ax = event.mouseevent.inaxes
-    if ax.col_data.alph == ini_alph:
+	ax = event.mouseevent.inaxes
+	if ax.col_data.alph == ini_alph:
 		ax.col_data.ok[event.ind] = not ax.col_data.ok[event.ind].any() ## if any point is ok change to rejected
 		plot_color(ax.col_data, ax, autoscale=False, state_scl=2)
-    
-# freezes points and blocks operations on a chart
+
+# freeze points and blocks operations on a chart
 def frozen_plot(plot_ax):
 	plot_ax.col_data.alph = fin_alph
 	plot_ax.col_data.buttstr = fin_buttstr
@@ -170,7 +171,7 @@ Bunchlst = [Bunch(imag = D[:,i], err_imag = D[:,i+1], smag = D[:,i+2], err_smag 
 
 # search for incomplete pairs of mags, i.e. mags equal nocompl value
 for b in Bunchlst:
-	b.ismag = ismag
+	b.ismag = np.copy(ismag)
 	b.compl = np.logical_not([1 if nocompl in [im,ie,sm,se] else 0 for im,ie,sm,se in zip(b.imag,b.err_imag,b.smag,b.err_smag)])
 	for nr, i in enumerate(b.err_imag):
 		if i < min_err_mag:
@@ -196,19 +197,17 @@ b_last.err_dmag = (b_last.err_imag[b_last.filt] ** 2 + b_last.err_smag[b_last.fi
 Bunchlst[-1].icolor = Bunchlst[-2].icolor							# last
 Bunchlst[-1].err_icolor = Bunchlst[-2].err_icolor					# last
 
-# calculte initial model ax + b and reject status
+# calculate initial model ax + b and reject status
 for idx,b in enumerate(Bunchlst):
-	#wls = stmo.WLS(list(b.dmag), stmo.add_constant(list(b.icolor), prepend=False), weights=[1.0/i for i in list(b.err_icolor)]).fit()
-	#b.a = b.A = wls.params[0]
-	#b.b = b.B = wls.params[1]
 	res = odr.ODR(odr.Data(b.icolor, b.dmag, 1.0/(b.err_icolor**2), 1.0/(b.err_dmag**2)), odr.Model(fun_odr), beta0=[0.,0.]).run()
 	ini_a = res.beta[0]
 	ini_b = res.beta[1]
 	res = odr.ODR(odr.Data(b.icolor, b.dmag, 1.0/(b.err_icolor**2), 1.0/(b.err_dmag**2)), odr.Model(fun_odr), beta0=[ini_a,ini_b]).run()
 	b.a = b.A = res.beta[0]
 	b.b = b.B = res.beta[1]
-	b.N = b.RMS = -1
 	b.ok = np.logical_not(sigma_clip((np.array(list(b.dmag))) - b.a * (np.array(list(b.icolor))) + b.b, sigma=sigma).mask)
+	b.N = np.sum(b.ok)
+	b.RMS = (res.res_var/b.N) ** 0.5
 	# needed to mark frozen charts
 	b.alph = ini_alph
 	b.buttstr = ini_buttstr
@@ -228,43 +227,61 @@ Bunchlst[-1].name = 'Equation[' + str(i+2) + ']'
 Bunchlst[-1].xlab = Bunchlst[-2].xlab			# last
 Bunchlst[-1].ylab = hr[-2] + ' - ' + hr[-4]		# last
 
-fig, plotax = subplots()
+if not it:
+	fig, plotax = subplots()
 
-# switcher
-subplots_adjust(bottom=0.2)
-axbutts = [axes([0.1 + i*0.05, 0.05, 0.05, 0.075]) for i in range(len(Bunchlst))]
-for i, ax in enumerate(axbutts):
-	ax.col_button = Button(ax, str(i + 1))
-	ax.col_button.on_clicked(lambda event: select_color(event.inaxes, plotax))
-	ax.col_data = Bunchlst[i]
+	# switcher
+	subplots_adjust(bottom=0.2)
+	axbutts = [axes([0.1 + i*0.05, 0.05, 0.05, 0.075]) for i in range(len(Bunchlst))]
+	for i, ax in enumerate(axbutts):
+		ax.col_button = Button(ax, str(i + 1))
+		ax.col_button.on_clicked(lambda event: select_color(event.inaxes, plotax))
+		ax.col_data = Bunchlst[i]
 
-# zoom button - ignores rejected
-axzoom = axes([0.66, 0.05, 0.08, 0.075])
-zoombutt = Button(axzoom, "Zoom +")
-zoombutt.on_clicked(lambda event: zoom_to_ok(plotax))
+	# zoom button - ignores rejected
+	axzoom = axes([0.66, 0.05, 0.08, 0.075])
+	zoombutt = Button(axzoom, "Zoom +")
+	zoombutt.on_clicked(lambda event: zoom_to_ok(plotax))
 
-# zoom reset button
-axreset = axes([0.74, 0.05, 0.08, 0.075])
-resetbutt = Button(axreset, "Zoom -")
-resetbutt.on_clicked(lambda event: zoom_to_reset(plotax))
+	# zoom reset button
+	axreset = axes([0.74, 0.05, 0.08, 0.075])
+	resetbutt = Button(axreset, "Zoom -")
+	resetbutt.on_clicked(lambda event: zoom_to_reset(plotax))
 
-# finish selection
-axdone = axes([0.82, 0.05, 0.08, 0.075])
-donebutt = Button(axdone, ini_buttstr)
-donebutt.on_clicked(lambda event: frozen_plot(plotax))
+	# finish selection
+	axdone = axes([0.82, 0.05, 0.08, 0.075])
+	donebutt = Button(axdone, ini_buttstr)
+	donebutt.on_clicked(lambda event: frozen_plot(plotax))
 
-# loop to calculate all values for each charts, initially -1 is assigned to RMS and N variables
-for i in axbutts[::-1]:
-	select_color(i, plotax)
-fig.canvas.mpl_connect('pick_event', on_pick_point)
-show()
+	# loop to calculate all values for each charts, initially -1 is assigned to RMS and N variables
+	for i in axbutts[::-1]:
+		select_color(i, plotax)
+	fig.canvas.mpl_connect('pick_event', on_pick_point)
+	show()
+
+else:
+	for b in Bunchlst:
+		for i in range(it):
+			b.ok = np.logical_not(sigma_clip((np.array(list(b.dmag))) - b.A * (np.array(list(b.icolor))) + b.B, sigma=sigma).mask)
+			res = odr.ODR(odr.Data(b.icolor[b.ok], b.dmag[b.ok], 1.0/(b.err_icolor[b.ok] ** 2), 1.0/(b.err_dmag[b.ok] ** 2)), odr.Model(fun_odr), beta0=[b.a, b.b]).run()
+			b.A = res.beta[0]
+			b.B = res.beta[1]
+			b.N = np.sum(b.ok)
+			b.RMS = (res.res_var/b.N) ** 0.5
 
 # make a name of a log file
-while out.count('.'):
-	out = out[:out.rfind('.')]
-	if out[-1] != '.':
+log = out
+while log.count('.'):
+	log = log[:out.rfind('.')]
+	if log[-1] != '.':
 		break
-log = out + '.log'
+
+if log+'.log' != out:
+	log += '.log'
+else:
+	tmp = out
+	out = log
+	log = tmp
 
 # save png images
 for b in Bunchlst:
@@ -277,3 +294,31 @@ dl.write("# Eq_num  A_coeff  B_coeff  N_stars  RMS/star\n")
 for b in Bunchlst:
 	dl.write("%2s %8.4f %8.4f %6d %7.4f\n" % (b.name.replace('Equation[','').replace(']',''), b.A, b.B, b.N, b.RMS))
 dl.close()
+
+# calculate standard magnitudes
+for b1,b2 in zip(Bunchlst, Bunchlst[1:]):
+	for idx,(i,j) in enumerate(zip(b1.imag,b2.imag)):
+		if b1.imag[idx] != nocompl and b2.imag[idx] != nocompl:
+			b1.ismag[idx] = b1.imag[idx] + b1.A * (b1.imag[idx] - b2.imag[idx]) + b1.B
+
+# the last pair of passbands
+for b1,b2 in zip(Bunchlst[-2:-1],Bunchlst[-1:]):
+	for idx,(i,j) in enumerate(zip(b1.imag,b2.imag)):
+		if b1.imag[idx] != nocompl and b2.imag[idx] != nocompl:
+			b2.ismag[idx] = b2.imag[idx] + b2.A * (b1.imag[idx] - b2.imag[idx]) + b2.B
+
+# save standard magnitudes into output file
+FmtList = []
+FmtList.append('%7d')
+OutArr = []
+OutArr.append(no)
+
+for i in range(len(Bunchlst)):
+	FmtList.append('%10.4f')
+	FmtList.append('%7.4f')
+
+for b in Bunchlst:
+	OutArr.append(b.ismag)
+	OutArr.append(b.err_imag)
+
+np.savetxt(out, array(OutArr).T, fmt=FmtList)
