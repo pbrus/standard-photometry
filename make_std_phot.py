@@ -2,40 +2,39 @@
 # coding=utf-8
 
 from argparse import ArgumentParser
-from argparse import RawTextHelpFormatter as tefo	# allow to use new line within argparse strings
+from argparse import RawTextHelpFormatter as tefo	# allow to use a new line within argparse strings
 
 ## parse script arguments
-argparser = ArgumentParser(description='>> Conversion instrumental to standard photometry <<\n\n \
-Requires Python 2 with:\n  * pylab\n  * scipy\n  * astropy\n  * argparse\n  * matplotlib\n\n', 
-epilog='Authors: M.Kałuszyński & P.Bruś, ver. 2016-05-19', formatter_class=tefo)
+argparser = ArgumentParser(description='>> Convert instrumental to standard photometry <<\n\n \
+Requires Python 2 with:\n  * pylab\n  * scipy\n  * argparse\n  * matplotlib\n\n', 
+epilog='Authors: M.Kałuszyński & P.Bruś, ver. 2016-09-12', formatter_class=tefo)
 argparser.add_argument('input_file', help='with the following structure:\n \
 num_star ins_mag1 err_ins_mag1 std_mag1 err_std_mag1 ... ins_magN err_ins_magN \
 std_magN err_std_magN\n\nnote:\n > mag1 ... magN should be sorted by growing \
 wavelength\n > first line should be a comment preceded by # sign\n > the comment \
 should contain the names of used passbands\n > pattern of a header for 3 \
-passbands:\n   # no_star U_ins U_ierr U_std U_serr B_ins B_ierr B_std B_serr \
-V_ins V_ierr V_std V_serr\n > the names in a header are used to assign the \
-axes on charts\n > lack of the value in input_file should be signaled by 99.9999 \
+passbands UBV:\n   # no_star U_ins U_ierr U_std U_serr B_ins B_ierr B_std B_serr \
+V_ins V_ierr V_std V_serr\n > the names in the header are used to assign the \
+axes on charts\n > lack of the value in the input_file should be signaled by 99.9999 \
 (mags or errors)\n\n')
 argparser.add_argument('output_file', help='will be produced having the following \
 structure:\n num_star std(ins_mag1) err_ins_mag1 ... std(ins_magN) err_ins_magN\n\n\
 note:\n > std(ins_mag) is an instrumental magnitude converted into a standard magnitude\n\
  > program makes output_file.log which contains parameters of conversions\n > program \
 generates PNG figures illustrating each fitting')
-argparser.add_argument('-s', help='float value of sigma for sigma clipping', dest='s', default=3)
-argparser.add_argument('-i', help='number of iterations for sigma clipping\nIf this option \
-is turned on the program\ndoesn\'t display an interactive mode', dest='it', default=0)
+argparser.add_argument('-v', help='turn on an interacitve mode', action='store_true')
+argparser.add_argument('-s', help='multiple of sigma for sigma clipping', dest='s', default=3.)
+argparser.add_argument('-i', help='number of iterations for sigma clipping', dest='it', default=0)
 args = argparser.parse_args()
 
 from scipy import stats, odr
 from pylab import *
-from astropy.stats import sigma_clip
 from matplotlib.cbook import Bunch
 from matplotlib import pyplot as plt
 
 ######################################################################################################
 
-# for sigma clipping
+# multiple of sigma
 sigma = float(args.s)
 
 # number of iterations
@@ -54,26 +53,32 @@ fin_buttstr = 'Done'
 # none value in input_file should be marked by nocompl variable
 nocompl = 99.9999
 
-# to prevent setting err_mag = 0.0000 because of division by 1.0/err_mag^2 to compute weights
+# prevent to set err_mag = 0.0000 because of division by 1.0/err_mag^2 to compute weights
 min_err_mag = 0.0001
 
 ######################################################################################################
 
-# plots scatter chart on ax for color info Bunch c
+# plot scatter chart on ax for color info Bunch
 def plot_color(b, ax, autoscale = True, state_scl = 0, legend = False):
-	res = odr.ODR(odr.Data(b.icolor[b.ok], b.dmag[b.ok], 1.0/(b.err_icolor[b.ok] ** 2), 1.0/(b.err_dmag[b.ok] ** 2)), odr.Model(fun_odr), beta0=[b.a, b.b]).run()
-	b.A = res.beta[0]
-	b.B = res.beta[1]
 	b.N = np.sum(b.ok)
-	b.RMS = (res.res_var/b.N) ** 0.5
+	if not (b.N == b.inisum):	# to prevent making the first iteration during ONLY displaying a plot
+		res = odr.ODR(odr.Data(b.icolor[b.ok], b.dmag[b.ok], 1.0/(b.err_icolor[b.ok] ** 2), 1.0/(b.err_dmag[b.ok] ** 2)), odr.Model(fun_odr), beta0=[b.A, b.B]).run()
+		b.A = res.beta[0]
+		b.B = res.beta[1]
+		b.N = np.sum(b.ok)
+		b.RMS = RMS(zip(b.icolor[b.ok],b.dmag[b.ok]),zip(b.err_icolor[b.ok],b.err_dmag[b.ok]),b.A,b.B)
+		b.inisum = -1
 	ax.cla()
 	ax.set_autoscale_on(autoscale)
 	ax.autoscale(autoscale)
 	fillcolor = ['b' if ok else 'r' for ok in b.ok]
 	ax.scatter(b.icolor, b.dmag, c = fillcolor, alpha=b.alph, picker=5, label='stars')
 	ax.plot(b.icolor, b.icolor * b.a + b.b, 'gray', alpha=0.2, label='initial regression')  # oryginal
-	ax.plot(b.icolor, b.icolor * b.A + b.B, 'red', alpha=0.3, label='regression without rejected')  # actual
-	ax.set_title(b.name + ' --- y = %.4fx + %.4f ------ RMS = %.4f --- N = %i' % (b.A, b.B, b.RMS, b.N), fontsize=20)
+	ax.plot(b.icolor, b.icolor * b.A + b.B, 'red', alpha=0.3, label='regression without rejected')  # current
+	if b.B >= 0.0:
+		ax.set_title(b.name + ' --- y = %.4fx + %.4f ------ RMS = %.4f --- N = %i' % (b.A, b.B, b.RMS, b.N), fontsize=20)
+	else:
+		ax.set_title(b.name + ' --- y = %.4fx - %.4f ------ RMS = %.4f --- N = %i' % (b.A, abs(b.B), b.RMS, b.N), fontsize=20)
 	ax.tick_params(axis='x', labelsize=13)
 	ax.tick_params(axis='y', labelsize=13)
 	ax.set_xlabel(b.xlab, fontsize=16)
@@ -95,13 +100,13 @@ def plot_color(b, ax, autoscale = True, state_scl = 0, legend = False):
 		ax.legend()
 	ax.figure.canvas.draw_idle()
 
-# select new color to plot specified by button's ax (and plot)
+# select new color (magnitude color) to plot a chart specified by button's ax
 def select_color(click_ax, plot_ax):
 	plot_ax.col_data = click_ax.col_data
 	donebutt.label.set_text(plot_ax.col_data.buttstr)
 	plot_color(click_ax.col_data, plot_ax, state_scl=2)
 
-# zoom in ignoring rejected points
+# zoom in (ignoring rejected points)
 def zoom_to_ok(plot_ax):
 	plot_color(plot_ax.col_data, plot_ax, state_scl=1)
 
@@ -109,14 +114,14 @@ def zoom_to_ok(plot_ax):
 def zoom_to_reset(plot_ax):
 	plot_color(plot_ax.col_data, plot_ax)
 
-# reject/unreject point manually on pick
+# choose points pointing them manually
 def on_pick_point(event):
 	ax = event.mouseevent.inaxes
 	if ax.col_data.alph == ini_alph:
-		ax.col_data.ok[event.ind] = not ax.col_data.ok[event.ind].any() ## if any point is ok change to rejected
+		ax.col_data.ok[event.ind] = not ax.col_data.ok[event.ind].any() # if any point is OK, change to rejected
 		plot_color(ax.col_data, ax, autoscale=False, state_scl=2)
 
-# freeze points and blocks operations on a chart
+# freeze points and block any operations on a chart
 def frozen_plot(plot_ax):
 	plot_ax.col_data.alph = fin_alph
 	plot_ax.col_data.buttstr = fin_buttstr
@@ -130,7 +135,10 @@ def fun_odr(P,x):
 
 # create a png image
 def make_plot(b, output, fig, ax):
-	ax.set_title(b.name + ' --- y = %.4fx + %.4f ------ RMS = %.4f --- N = %i' % (b.A, b.B, b.RMS, b.N), fontsize=20)
+	if b.B >= 0.0:
+		ax.set_title(b.name + ' --- y = %.4fx + %.4f ------ RMS = %.4f --- N = %i' % (b.A, b.B, b.RMS, b.N), fontsize=20)
+	else:
+		ax.set_title(b.name + ' --- y = %.4fx - %.4f ------ RMS = %.4f --- N = %i' % (b.A, abs(b.B), b.RMS, b.N), fontsize=20)
 	xmin = b.icolor[b.ok].min()
 	xmax = b.icolor[b.ok].max()
 	xmrg = abs(xmin - xmax) * 0.05 # 5% margin
@@ -148,12 +156,40 @@ def make_plot(b, output, fig, ax):
 	fig.set_size_inches(16.0, 9.0, forward=True)
 	fig.savefig(output.replace('.','_') + '-' + b.name.lower().replace('[','-').replace(']',''))
 
+# orthogonal distance between given point and line y=Ax+B
+def dist(A,B,p):
+	return abs(A*p[0] - p[1] + B)/math.sqrt(A**2 + 1)
+
+# statistical weight
+def wgt(err):
+	return 1.0/math.sqrt(err[0]**2 + err[1]**2)
+
+# compute RMS
+def RMS(pts,err,A,B):
+	d2 = [dist(A,B,p)**2 for p in pts]
+	w = [wgt(e) for e in err]
+	wd2 = [i[0]*i[1] for i in zip(w,d2)]
+	return math.sqrt(sum(wd2)/sum(w))
+
+# compute sigma clipping, cannot use python's built-in functions (occurrence orthogonality)
+def Sigma_Clip(pts,sig):
+	m = []
+	if sig == -1:		# all points remain
+		m = [False] * len(pts)
+	else:
+		for p in pts:
+			if p > sig:
+				m.append(True)
+			else:
+				m.append(False)
+	return ma.array(pts, mask=m)
+
 ## load and extract data
 # read header
 out = args.output_file
 fi = open(args.input_file, "r")
 hr = fi.readline().replace('#','').replace('\r','').replace('\n','').split(' ')	# remove hashtags and whitespaces
-fi.seek(0)	# set pointer at beginning of the input file
+fi.seek(0)	# set pointer at the beginning of an input file
 fi.close()	# obvious :)
 
 # delete null strings
@@ -166,7 +202,7 @@ no = D[:,0]							# get the first column of D array, numbers indicating the star
 ismag = np.empty(len(no))
 ismag.fill(nocompl)
 
-# bunchlst - list of the Bunches, each Bunch represents 3 columns: instrumental mag, error of instr. mag and standard mag
+# bunchlst - list of the Bunches, each Bunch represents 4 columns: instrumental mag, error of instr. mag, standard mag and it's error
 Bunchlst = [Bunch(imag = D[:,i], err_imag = D[:,i+1], smag = D[:,i+2], err_smag = D[:,i+3]) for i in range(1, D.shape[1] - 1, 4)]
 
 # search for incomplete pairs of mags, i.e. mags equal nocompl value
@@ -199,23 +235,29 @@ Bunchlst[-1].err_icolor = Bunchlst[-2].err_icolor					# last
 
 # calculate initial model ax + b and reject status
 for idx,b in enumerate(Bunchlst):
-	res = odr.ODR(odr.Data(b.icolor, b.dmag, 1.0/(b.err_icolor**2), 1.0/(b.err_dmag**2)), odr.Model(fun_odr), beta0=[0.,0.]).run()
+	res = odr.ODR(odr.Data(b.icolor, b.dmag, 1.0/(b.err_icolor ** 2), 1.0/(b.err_dmag ** 2)), odr.Model(fun_odr), beta0=[0.,0.]).run()
 	ini_a = res.beta[0]
 	ini_b = res.beta[1]
-	res = odr.ODR(odr.Data(b.icolor, b.dmag, 1.0/(b.err_icolor**2), 1.0/(b.err_dmag**2)), odr.Model(fun_odr), beta0=[ini_a,ini_b]).run()
+	res = odr.ODR(odr.Data(b.icolor, b.dmag, 1.0/(b.err_icolor ** 2), 1.0/(b.err_dmag ** 2)), odr.Model(fun_odr), beta0=[ini_a,ini_b]).run()
 	b.a = b.A = res.beta[0]
 	b.b = b.B = res.beta[1]
-	b.ok = np.logical_not(sigma_clip((np.array(list(b.dmag))) - b.a * (np.array(list(b.icolor))) + b.b, sigma=sigma).mask)
+	# 0.iteration
+	b.ok = np.logical_not(Sigma_Clip([dist(b.a,b.b,p) for p in zip(b.icolor,b.dmag)],-1).mask)		# value -1: take all points (no rejection)
+	b.RMS = RMS(zip(b.icolor,b.dmag),zip(b.err_icolor,b.err_dmag),b.a,b.b)
 	b.N = np.sum(b.ok)
-	b.RMS = (res.res_var/b.N) ** 0.5
+	# for iteration > 0
+	if it:
+		b.ok = np.logical_not(Sigma_Clip([dist(b.A,b.B,p) for p in zip(b.icolor,b.dmag)],sigma*b.RMS).mask)
 	# needed to mark frozen charts
 	b.alph = ini_alph
 	b.buttstr = ini_buttstr
 	# needed to set proper scale
 	b.ini_low = b.cur_low = b.dmag.min()
 	b.ini_upr = b.cur_upr = b.dmag.max()
-	# idx needed to mark switchers by 'OK' label
+	# needed to mark switchers by 'OK' label
 	b.idx = idx
+	# initial amount of points (see plot_color() function)
+	b.inisum = b.N
 
 # labels of axes and charts
 for i, b in enumerate(Bunchlst[:-1]):
@@ -227,10 +269,25 @@ Bunchlst[-1].name = 'Equation[' + str(i+2) + ']'
 Bunchlst[-1].xlab = Bunchlst[-2].xlab			# last
 Bunchlst[-1].ylab = hr[-2] + ' - ' + hr[-4]		# last
 
-if not it:
+# iterations
+if it:
+	for b in Bunchlst:
+		for i in range(it):
+			res = odr.ODR(odr.Data(b.icolor[b.ok], b.dmag[b.ok], 1.0/(b.err_icolor[b.ok] ** 2), 1.0/(b.err_dmag[b.ok] ** 2)), odr.Model(fun_odr), beta0=[b.A, b.B]).run()
+			b.A = res.beta[0]
+			b.B = res.beta[1]
+			b.RMS = RMS(zip(b.icolor,b.dmag),zip(b.err_icolor,b.err_dmag),b.A,b.B)
+			b.ok = np.logical_not(Sigma_Clip([dist(b.A,b.B,p) for p in zip(b.icolor,b.dmag)],sigma*b.RMS).mask)
+			b.N = np.sum(b.ok)
+			b.RMS = RMS(zip(b.icolor[b.ok],b.dmag[b.ok]),zip(b.err_icolor[b.ok],b.err_dmag[b.ok]),b.A,b.B)
+		# initial amount of points (see plot_color() function)
+		b.inisum = b.N
+
+# view mode
+if args.v:
 	fig, plotax = subplots()
 
-	# switcher
+	# switcher between subplots
 	subplots_adjust(bottom=0.2)
 	axbutts = [axes([0.1 + i*0.05, 0.05, 0.05, 0.075]) for i in range(len(Bunchlst))]
 	for i, ax in enumerate(axbutts):
@@ -238,7 +295,7 @@ if not it:
 		ax.col_button.on_clicked(lambda event: select_color(event.inaxes, plotax))
 		ax.col_data = Bunchlst[i]
 
-	# zoom button - ignores rejected
+	# zoom button - ignore rejected points
 	axzoom = axes([0.66, 0.05, 0.08, 0.075])
 	zoombutt = Button(axzoom, "Zoom +")
 	zoombutt.on_clicked(lambda event: zoom_to_ok(plotax))
@@ -253,21 +310,11 @@ if not it:
 	donebutt = Button(axdone, ini_buttstr)
 	donebutt.on_clicked(lambda event: frozen_plot(plotax))
 
-	# loop to calculate all values for each charts, initially -1 is assigned to RMS and N variables
+	# loop to calculate all values for each charts
 	for i in axbutts[::-1]:
 		select_color(i, plotax)
 	fig.canvas.mpl_connect('pick_event', on_pick_point)
 	show()
-
-else:
-	for b in Bunchlst:
-		for i in range(it):
-			b.ok = np.logical_not(sigma_clip((np.array(list(b.dmag))) - b.A * (np.array(list(b.icolor))) + b.B, sigma=sigma).mask)
-			res = odr.ODR(odr.Data(b.icolor[b.ok], b.dmag[b.ok], 1.0/(b.err_icolor[b.ok] ** 2), 1.0/(b.err_dmag[b.ok] ** 2)), odr.Model(fun_odr), beta0=[b.a, b.b]).run()
-			b.A = res.beta[0]
-			b.B = res.beta[1]
-			b.N = np.sum(b.ok)
-			b.RMS = (res.res_var/b.N) ** 0.5
 
 # make a name of a log file
 log = out
