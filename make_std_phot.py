@@ -7,7 +7,7 @@ from argparse import RawTextHelpFormatter as tefo	# allow to use a new line with
 ## parse script arguments
 argparser = ArgumentParser(description='>> Convert instrumental to standard photometry <<\n\n \
 Requires Python 2 with:\n  * pylab\n  * scipy\n  * argparse\n  * matplotlib\n\n', 
-epilog='Authors: M.Kałuszyński & P.Bruś, ver. 2016-09-12', formatter_class=tefo)
+epilog='Authors: M.Kałuszyński & P.Bruś, ver. 2016-09-13', formatter_class=tefo)
 argparser.add_argument('input_file', help='with the following structure:\n \
 num_star ins_mag1 err_ins_mag1 std_mag1 err_std_mag1 ... ins_magN err_ins_magN \
 std_magN err_std_magN\n\nnote:\n > mag1 ... magN should be sorted by growing \
@@ -337,7 +337,7 @@ for b in Bunchlst:
 
 # create a log file
 dl = open(log, "w")
-dl.write("# Eq_num  A_coeff  B_coeff  N_stars  RMS/star\n")
+dl.write("# Eq_num  A_coeff  B_coeff  N_stars  RMS\n")
 for b in Bunchlst:
 	dl.write("%2s %8.4f %8.4f %6d %7.4f\n" % (b.name.replace('Equation[','').replace(']',''), b.A, b.B, b.N, b.RMS))
 dl.close()
