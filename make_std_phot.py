@@ -77,7 +77,7 @@ def plot_color(b, ax, autoscale = True, state_scl = 0, legend = False):
 	if args.v and args.e:
 		ax.errorbar(b.icolor[b.ok], b.dmag[b.ok], xerr=b.err_icolor[b.ok], yerr=b.err_dmag[b.ok], ls="none", alpha=0.25)
 	ax.plot(b.icolor, b.icolor * b.a + b.b, 'gray', alpha=0.2, label='initial regression') 			# oryginal
-	ax.plot(b.icolor, b.icolor * b.A + b.B, 'red', alpha=0.3, label='regression without rejected')  # current
+	ax.plot(b.icolor, b.icolor * b.A + b.B, 'red', alpha=0.3, label='regression without rejected')	# current
 	if b.B >= 0.0:
 		ax.set_title(b.name + ' --- y = %.4fx + %.4f ------ RMS = %.4f --- N = %i' % (b.A, b.B, b.RMS, b.N), fontsize=20)
 	else:
