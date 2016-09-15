@@ -7,7 +7,7 @@ from argparse import RawTextHelpFormatter as tefo	# allow to use a new line with
 ## parse script arguments
 argparser = ArgumentParser(description='>> Convert instrumental to standard photometry <<\n\n \
 Requires Python 2 with:\n  * pylab\n  * scipy\n  * argparse\n  * matplotlib\n\n', 
-epilog='Authors: M.Kałuszyński & P.Bruś, ver. 2016-09-13', formatter_class=tefo)
+epilog='Authors: M.Kałuszyński & P.Bruś, ver. 2016-09-15', formatter_class=tefo)
 argparser.add_argument('input_file', help='with the following structure:\n \
 num_star ins_mag1 err_ins_mag1 std_mag1 err_std_mag1 ... ins_magN err_ins_magN \
 std_magN err_std_magN\n\nnote:\n > mag1 ... magN should be sorted by growing \
@@ -23,6 +23,7 @@ note:\n > std(ins_mag) is an instrumental magnitude converted into a standard ma
  > program makes output_file.log which contains parameters of conversions\n > program \
 generates PNG figures illustrating each fitting')
 argparser.add_argument('-v', help='turn on an interacitve mode', action='store_true')
+argparser.add_argument('-e', help='display error bars (works with -v option)', action='store_true')
 argparser.add_argument('-s', help='multiple of sigma for sigma clipping (default 3.0)', dest='s', default=3.)
 argparser.add_argument('-i', help='number of iterations for sigma clipping (default 0)', dest='it', default=0)
 args = argparser.parse_args()
@@ -73,6 +74,8 @@ def plot_color(b, ax, autoscale = True, state_scl = 0, legend = False):
 	ax.autoscale(autoscale)
 	fillcolor = ['b' if ok else 'r' for ok in b.ok]
 	ax.scatter(b.icolor, b.dmag, c = fillcolor, alpha=b.alph, picker=5, label='stars')
+	if args.v and args.e:
+		ax.errorbar(b.icolor[b.ok], b.dmag[b.ok], xerr=b.err_icolor[b.ok], yerr=b.err_dmag[b.ok], ls="none", alpha=0.25)
 	ax.plot(b.icolor, b.icolor * b.a + b.b, 'gray', alpha=0.2, label='initial regression')  # oryginal
 	ax.plot(b.icolor, b.icolor * b.A + b.B, 'red', alpha=0.3, label='regression without rejected')  # current
 	if b.B >= 0.0:
@@ -193,12 +196,12 @@ fi.seek(0)	# set pointer at the beginning of an input file
 fi.close()	# obvious :)
 
 # delete null strings
-while hr.count(''):					# counter of null strings in the header list, each loop step decreases this value
+while hr.count(''): 				# counter of null strings in the header list, each loop step decreases this value
 	del hr[hr.index('')]			# method .index('') returns index of the first occurence of null string
 
 # read data
-D = np.loadtxt(args.input_file)		# "import numpy as np" during pylab import 
-no = D[:,0]							# get the first column of D array, numbers indicating the stars
+D = np.loadtxt(args.input_file) 	# "import numpy as np" during pylab import 
+no = D[:,0] 						# get the first column of D array, numbers indicating the stars
 ismag = np.empty(len(no))
 ismag.fill(nocompl)
 
