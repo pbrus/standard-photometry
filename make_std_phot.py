@@ -5,27 +5,29 @@ from argparse import ArgumentParser
 from argparse import RawTextHelpFormatter as tefo	# allow to use a new line within argparse strings
 
 ## parse script arguments
-argparser = ArgumentParser(description='>> Convert instrumental to standard photometry <<\n\n \
-Requires Python 2 with:\n  * pylab\n  * scipy\n  * argparse\n  * matplotlib\n\n', 
-epilog='Authors: M.Kałuszyński & P.Bruś, ver. 2016-09-15', formatter_class=tefo)
-argparser.add_argument('input_file', help='with the following structure:\n \
+argparser = ArgumentParser(prog='make_std_phot.py', description='>> Convert instrumental magnitudes \
+to standard values <<\n\n Requires Python 2.7 with:\n  * argparse\n  * pylab\n  * scipy\n  * matplotlib\n\n', 
+epilog='Copyright (c) 2017 M.Kałuszyński & P.Bruś', formatter_class=tefo)
+argparser.add_argument('input_file', help='must have the following structure:\n \
 num_star ins_mag1 err_ins_mag1 std_mag1 err_std_mag1 ... ins_magN err_ins_magN \
 std_magN err_std_magN\n\nnote:\n > mag1 ... magN should be sorted by growing \
-wavelength\n > first line should be a comment preceded by # sign\n > the comment \
-should contain the names of used passbands\n > pattern of a header for 3 \
-passbands UBV:\n   # no_star U_ins U_ierr U_std U_serr B_ins B_ierr B_std B_serr \
-V_ins V_ierr V_std V_serr\n > the names in the header are used to assign the \
-axes on charts\n > lack of the value in the input_file should be signaled by 99.9999 \
-(mags or errors)\n\n')
+wavelength\n > the first line should be a comment preceded by # sign\n > the comment \
+should contain names of used passbands\n > pattern of the header for 3 passbands \
+UBV:\n   # no_star U_ins U_ierr U_std U_serr B_ins B_ierr B_std B_serr V_ins V_ierr \
+V_std V_serr\n > the names in the header are used to sign axes on charts\n \
+> lack of the value in the input_file should be signaled by 99.9999 (mags or errors)\n\n')
 argparser.add_argument('output_file', help='will be produced having the following \
 structure:\n num_star std(ins_mag1) err_ins_mag1 ... std(ins_magN) err_ins_magN\n\n\
-note:\n > std(ins_mag) is an instrumental magnitude converted into a standard magnitude\n\
+note:\n > std(ins_mag) is a standard magnitude converted from an instrumental magnitude\n\
  > program makes output_file.log which contains parameters of conversions\n > program \
 generates PNG figures illustrating each fitting')
+argparser.add_argument('-i', help='number of iterations for sigma clipping (default 0)', dest='it', type=int, default=0)
+argparser.add_argument('-s', help='multiple of sigma for sigma clipping (default 3.0)', dest='s', default=3.)
 argparser.add_argument('-v', help='turn on an interacitve mode', action='store_true')
 argparser.add_argument('-e', help='display error bars (works with -v option)', action='store_true')
-argparser.add_argument('-s', help='multiple of sigma for sigma clipping (default 3.0)', dest='s', default=3.)
-argparser.add_argument('-i', help='number of iterations for sigma clipping (default 0)', dest='it', default=0)
+argparser.add_argument('--ver', '--version', action='version', version='%(prog)s\n * Version: 2017-01-08\n \
+* Licensed under the MIT license:\n   http://opensource.org/licenses/MIT\n * Copyright (c) 2017 \
+Mikołaj Kałuszyński & Przemysław Bruś')
 args = argparser.parse_args()
 
 from scipy import stats, odr
@@ -39,7 +41,7 @@ from matplotlib import pyplot as plt
 sigma = float(args.s)
 
 # number of iterations
-it = int(args.it)
+it = args.it
 if it < 0:
 	it *= -1
 
