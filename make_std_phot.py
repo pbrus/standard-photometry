@@ -25,7 +25,7 @@ argparser.add_argument('-i', help='number of iterations for sigma clipping (defa
 argparser.add_argument('-s', help='multiple of sigma for sigma clipping (default 3.0)', dest='s', default=3.)
 argparser.add_argument('-v', help='turn on an interacitve mode', action='store_true')
 argparser.add_argument('-e', help='display error bars (works with -v option)', action='store_true')
-argparser.add_argument('--ver', '--version', action='version', version='%(prog)s\n * Version: 2017-01-08\n \
+argparser.add_argument('-V', '--version', action='version', version='%(prog)s\n * Version: 2017-01-22\n \
 * Licensed under the MIT license:\n   http://opensource.org/licenses/MIT\n * Copyright (c) 2017 \
 Mikołaj Kałuszyński & Przemysław Bruś')
 args = argparser.parse_args()
