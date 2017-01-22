@@ -1,4 +1,4 @@
-# Standard-photometry [![GitHub release](http://www.astro.uni.wroc.pl/ludzie/brus/img/github/ver20170108.svg "download")](https://github.com/PBrus/Standard-photometry/blob/master/make_std_phot.py) ![Written in Python](http://www.astro.uni.wroc.pl/ludzie/brus/img/github/Python.svg "language")
+# Standard-photometry [![GitHub release](http://www.astro.uni.wroc.pl/ludzie/brus/img/github/ver20170122.svg "download")](https://github.com/PBrus/Standard-photometry/blob/master/make_std_phot.py) ![Written in Python](http://www.astro.uni.wroc.pl/ludzie/brus/img/github/Python.svg "language")
 
 Allows to make standardization of photometry. It was written in pure Python.
 
@@ -13,11 +13,11 @@ Download `make_std_phot.py` wherever you want, then make the script executable. 
 
 ## Usage
  
- To use the program properly, you need to prepare a file with data. At the beginning call the script from the bash console with `-h` option:
+To use the program properly you need to prepare a file with data. At the beginning call the script from the terminal window with the `-h` option:
 ```bash
 $ make_std_phot.py -h
 ```
-This will give you description about all options. If you need to see the program in action immediately, please download `data.lst` file from repo to your working directory. A basic call doesn't display an interactive window - all computations run in background. The minimum required arguments are names of the input and output files.
+This will give you a description of all options. If you need to see the program in action immediately, please download `data.lst` file from the repository to your working directory. A basic call doesn't display an interactive window - all computations run in background. The minimum required arguments are names of the input and output files.
 ```bash
 $ make_std_phot.py data.lst results.lst
 ```
