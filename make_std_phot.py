@@ -378,4 +378,7 @@ for b in Bunchlst:
 np.savetxt(out, array(OutArr).T, fmt=FmtList)
 n = len(Bunchlst)
 print "%i files has been created:" % (n+2)
-print " > %s\n > %s\n > %i PNG images" % (log, out, n)
+if n == 1:
+    print " > %s\n > %s\n > %i PNG image" % (log, out, n)
+else:
+    print " > %s\n > %s\n > %i PNG images" % (log, out, n)
