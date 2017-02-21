@@ -1,6 +1,8 @@
-# Standard-photometry [![GitHub release](http://www.astro.uni.wroc.pl/ludzie/brus/img/github/ver20170122.svg "download")](https://github.com/PBrus/Standard-photometry/blob/master/make_std_phot.py) ![Written in Python](http://www.astro.uni.wroc.pl/ludzie/brus/img/github/Python.svg "language")
+# Standard-photometry [![GitHub release](http://www.astro.uni.wroc.pl/ludzie/brus/img/github/ver20170220.svg "download")](https://github.com/PBrus/Standard-photometry/blob/master/make_std_phot.py) ![Written in Python](http://www.astro.uni.wroc.pl/ludzie/brus/img/github/Python.svg "language")
 
-Allows to make a photometric standardization. It was written in pure Python.
+This program allows to make a photometric standardization. It was written in pure Python.
+
+![make_std_phot](http://www.astro.uni.wroc.pl/ludzie/brus/img/github/make_std_phot.gif)
 
 ## Installation
 
