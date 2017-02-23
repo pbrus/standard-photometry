@@ -2,7 +2,7 @@
 
 This program allows to make a photometric standardization. It was written in pure Python.
 
-![make_std_phot](http://www.astro.uni.wroc.pl/ludzie/brus/img/github/make_std_phot.gif)
+![make_std_phot](http://www.astro.uni.wroc.pl/ludzie/brus/img/github/Make_std_phot.gif)
 
 ## Installation
 
