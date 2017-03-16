@@ -7,7 +7,7 @@ from argparse import RawTextHelpFormatter as tefo   # allow to use a new line wi
 ## parse script arguments
 argparser = ArgumentParser(prog='make_std_phot.py', description='>> Convert instrumental magnitudes \
 to standard values <<\n\n Requires Python 2.7 with:\n  * argparse\n  * pylab\n  * scipy\n  * matplotlib\n\n',
-epilog='Copyright (c) 2017 M.Kałuszyński & P.Bruś', formatter_class=tefo)
+epilog='Copyright (c) 2017 P.Bruś & M.Kałuszyński & Z.Kołaczkowski', formatter_class=tefo)
 argparser.add_argument('input_file', help='must have the following structure:\n \
 num_star ins_mag1 err_ins_mag1 std_mag1 err_std_mag1 ... ins_magN err_ins_magN \
 std_magN err_std_magN\n\nnote:\n > mag1 ... magN should be sorted by growing \
@@ -25,9 +25,9 @@ argparser.add_argument('-i', help='number of iterations for sigma clipping (defa
 argparser.add_argument('-s', help='multiple of sigma for sigma clipping (default 3.0)', dest='s', default=3.)
 argparser.add_argument('-v', help='turn on an interacitve mode', action='store_true')
 argparser.add_argument('-e', help='display error bars (works with -v option)', action='store_true')
-argparser.add_argument('-V', '--version', action='version', version='%(prog)s\n * Version: 2017-02-20\n \
+argparser.add_argument('-V', '--version', action='version', version='%(prog)s\n * Version: 2017-03-16\n \
 * Licensed under the MIT license:\n   http://opensource.org/licenses/MIT\n * Copyright (c) 2017 \
-Mikołaj Kałuszyński & Przemysław Bruś')
+Przemysław Bruś &\n   Mikołaj Kałuszyński & Zbigniew Kołaczkowski')
 args = argparser.parse_args()
 
 from scipy import stats, odr
