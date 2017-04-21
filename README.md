@@ -1,4 +1,4 @@
-# standard-photometry [![GitHub release](http://www.astro.uni.wroc.pl/ludzie/brus/img/github/ver20170316.svg "download")](https://github.com/PBrus/Standard-photometry/blob/master/make_std_phot.py) ![Written in Python](http://www.astro.uni.wroc.pl/ludzie/brus/img/github/Python.svg "language")
+# Standard-photometry [![GitHub release](http://www.astro.uni.wroc.pl/ludzie/brus/img/github/ver20170316.svg "download")](https://github.com/PBrus/Standard-photometry/blob/master/make_std_phot.py) ![Written in Python](http://www.astro.uni.wroc.pl/ludzie/brus/img/github/Python.svg "language")
 
 This program allows to make a photometric standardization. It was written in pure Python.
 
@@ -39,4 +39,4 @@ I encourage to visit my website to see more detailed description of this program
 
 ## License
 
-**standard-photometry** is licensed under the [MIT license](http://opensource.org/licenses/MIT).
+**Standard-photometry** is licensed under the [MIT license](http://opensource.org/licenses/MIT).
