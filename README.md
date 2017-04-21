@@ -1,8 +1,8 @@
-# Standard-photometry [![GitHub release](http://www.astro.uni.wroc.pl/ludzie/brus/img/github/ver20170316.svg "download")](https://github.com/PBrus/Standard-photometry/blob/master/make_std_phot.py) ![Written in Python](http://www.astro.uni.wroc.pl/ludzie/brus/img/github/Python.svg "language")
+# Standard-photometry [![GitHub release](http://www.astro.uni.wroc.pl/ludzie/brus/img/github/ver20170316.svg "download")](https://github.com/pbrus/standard-photometry/blob/master/make_std_phot.py) ![Written in Python](http://www.astro.uni.wroc.pl/ludzie/brus/img/github/python.svg "language")
 
 This program allows to make a photometric standardization. It was written in pure Python.
 
-![make_std_phot](http://www.astro.uni.wroc.pl/ludzie/brus/img/github/Make_std_phot.gif)
+![make_std_phot](http://www.astro.uni.wroc.pl/ludzie/brus/img/github/make-std-phot.gif)
 
 ## Installation
 
@@ -35,7 +35,7 @@ Assume that the output file has name `results.lst`. Each run of the program gene
 
 where the amount of the images depends on the number of used equations.
 
-I encourage to visit my website to see more detailed description of this program. The current link can be found on my [GitHub profile](https://github.com/PBrus).
+I encourage to visit my website to see more detailed description of this program. The current link can be found on my [GitHub profile](https://github.com/pbrus).
 
 ## License
 
