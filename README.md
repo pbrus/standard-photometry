@@ -8,10 +8,10 @@ This program allows to make a photometric standardization. It was written in pur
 
 Download `make_std_phot.py` wherever you want, then make the script executable. I recommend to download it to any catalog pointed by the `$PATH` variable. Moreover you should have installed *Python 2.7* with the following modules:
 
- * *scipy*
- * *pylab*
- * *matplotlib*
- * *argparse*
+ * *scipy 0.19.1*
+ * *numpy 1.13.1*
+ * *matplotlib 2.0.2*
+ * *argparse 1.1*
 
 ## Usage
 
