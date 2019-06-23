@@ -7,13 +7,13 @@ class Columns:
 
     def __init__(self, columns):
         self.columns = columns
-        self.indexes = self.indexes()
+        self.indexes = self.indexes(columns)
 
-    def indexes(self):
+    def indexes(self, columns):
         indexes = []
 
         for column in self.columns:
-            arg_type = self.argument_type(column)
+            arg_type = self.column_type(column)
 
             if arg_type == "number":
                 indexes.append(int(column) - 1)
@@ -24,7 +24,7 @@ class Columns:
 
         return indexes
 
-    def argument_type(self, column):
+    def column_type(self, column):
 
         if search('^[0-9]{1,}$', column):
             return "number"
@@ -32,7 +32,6 @@ class Columns:
             return "range"
         else:
             raise ValueError("Invalid column argument {}".format(column))
-            exit(1)
 
     @staticmethod
     def split_range(column):
@@ -43,4 +42,3 @@ class Columns:
         if start >= end:
             column = str(start) + ":" + str(end)
             raise ValueError("Invalid column argument {}".format(column))
-            exit(1)
