@@ -1,4 +1,7 @@
-import pandas as pd
+"""
+The Columns class handles a list of integers. These numbers are pointers
+to indexes of columns of a text file.
+"""
 from re import search
 
 
