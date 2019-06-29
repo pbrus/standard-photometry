@@ -66,3 +66,11 @@ class Header(Columns):
         self.__identifier_label = str(*self.__identifier_label)
 
         return self.__identifier_label
+
+    @property
+    def labels(self):
+        return self.__column_labels
+
+    @property
+    def identifier(self):
+        return self.__identifier_label
