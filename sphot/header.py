@@ -4,6 +4,10 @@ from .columns import Columns
 
 
 class Header(Columns):
+    """
+    Handle a header of a text file. Transform
+    a list of columns to the list of labels.
+    """
 
     __suffixes = [
         "_ins",
@@ -13,6 +17,19 @@ class Header(Columns):
     ]
 
     def __init__(self, filename, columns):
+        """
+        Set a filename and a list of columns. Trigger internal helper
+        methods to transform the list to labels from a header.
+
+        Parameters
+        ----------
+        filename : str
+            A name of the input text file.
+        columns : list
+            A list of columns. Each column should be represented
+            by a string. The string must contain an integer or a range
+            of integers. For example ['2', '4', '7:11', '15'].
+        """
         super().__init__(columns)
         self.filename = filename
         self._check_column_numbers()
@@ -69,8 +86,24 @@ class Header(Columns):
 
     @property
     def labels(self):
+        """
+        Get labels of columns keeping the proper order of them.
+
+        Returns
+        -------
+        list
+            A list of labels. Each label is represented by a string.
+        """
         return self.__column_labels
 
     @property
     def identifier(self):
+        """
+        Get a label of the column with the identifier.
+
+        Returns
+        -------
+        str
+            A string label.
+        """
         return self.__identifier_label
