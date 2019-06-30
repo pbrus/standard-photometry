@@ -80,3 +80,15 @@ class Columns:
         if start >= end:
             column = str(start) + ":" + str(end)
             raise ValueError("Invalid column argument {}".format(column))
+
+    @property
+    def indexes(self):
+        """
+        Get a list of indexes.
+
+        Returns
+        -------
+        list
+            A list of indexes represented by integers.
+        """
+        return self.__indexes
