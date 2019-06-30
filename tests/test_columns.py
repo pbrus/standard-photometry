@@ -18,7 +18,7 @@ def init_columns():
     ("5:13", "range")
 ])
 def test_column_type(init_columns, column, value):
-    assert init_columns.column_type(column) == value
+    assert init_columns._column_type(column) == value
 
 
 @pytest.mark.parametrize("start, end", [
@@ -28,7 +28,7 @@ def test_column_type(init_columns, column, value):
 ])
 def test_validate_range(init_columns, start, end):
     with pytest.raises(ValueError):
-        init_columns.validate_range(start, end)
+        init_columns._validate_range(start, end)
 
 
 @pytest.mark.parametrize("column, start, end", [
