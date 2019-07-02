@@ -82,7 +82,7 @@ class Header(Columns):
         return self.__column_labels
 
     def _get_identifier_column_label(self, passband_column_names):
-        """Get a label which represent a column with identifiers."""
+        """Get a label which represents a column with identifiers."""
         self.__identifier_label = (
             set(self.__header.columns) - set(passband_column_names))
         self.__identifier_label = str(*self.__identifier_label)
