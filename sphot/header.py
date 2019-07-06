@@ -43,8 +43,7 @@ class Header(Columns):
         total, rest = divmod(len(self.indexes), n)
 
         if (rest != 1) or not total:
-            raise ValueError(
-                "Number of columns must be equal ({}n + 1).".format(n))
+            raise ValueError(f'Number of columns must be equal ({n}n + 1)')
 
     def _read_header(self):
         """Read a header file."""
@@ -72,7 +71,7 @@ class Header(Columns):
 
             if column_name not in self.__header.columns:
                 raise ValueError(
-                    "There is no '{}' in the file header.".format(column_name))
+                    f'There is no {column_name} in the file header')
 
             self.__column_labels.append(column_name)
 

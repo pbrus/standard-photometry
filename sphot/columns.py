@@ -51,7 +51,7 @@ class Columns:
         elif search('^[0-9]{1,}:[0-9]{1,}$', column):
             return "range"
         else:
-            raise ValueError("Invalid column argument {}".format(column))
+            raise ValueError(f'Invalid column argument {column}')
 
     @staticmethod
     def split_range(column):
@@ -79,7 +79,7 @@ class Columns:
         """
         if start >= end:
             column = str(start) + ":" + str(end)
-            raise ValueError("Invalid column argument {}".format(column))
+            raise ValueError(f'Invalid column argument {column}')
 
     @property
     def indexes(self):
