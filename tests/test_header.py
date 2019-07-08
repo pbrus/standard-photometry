@@ -8,7 +8,7 @@ from sphot.header import Header
 
 @pytest.fixture
 def path_to_data():
-    return r'test_data/'
+    return r'tests/test_data/'
 
 
 @pytest.fixture
@@ -25,7 +25,7 @@ def labels():
 
 @pytest.fixture
 def header(path_to_data):
-    return Header(path_to_data + r'/header.dat', ['1:17'])
+    return Header(path_to_data + r'header.dat', ['1:17'])
 
 
 @pytest.mark.parametrize("columns", [
@@ -35,7 +35,7 @@ def header(path_to_data):
 ])
 def test_check_column_numbers(path_to_data, columns):
     with pytest.raises(ValueError):
-        Header(path_to_data + r'/header.dat', columns)
+        Header(path_to_data + r'header.dat', columns)
 
 
 def test_get_passband_labels(header):
