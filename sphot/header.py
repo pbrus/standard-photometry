@@ -88,6 +88,10 @@ class Header(Columns):
 
         return self.__identifier_label
 
+    def _get_specific_labels(self, suffix):
+        """Get a list of labels with specific suffixes."""
+        return [label for label in self.labels if suffix in label]
+
     @property
     def labels(self):
         """

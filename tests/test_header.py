@@ -47,6 +47,14 @@ def test_get_passband_column_labels(header, labels):
     assert header._get_passband_column_labels() == labels
 
 
+@pytest.mark.parametrize("suffix, labels", [
+    ("_ins", ["U_ins", "B_ins", "V_ins", "I_ins"]),
+    ("_std", ["U_std", "B_std", "V_std", "I_std"])
+])
+def test_get_specific_labels(header, suffix, labels):
+    assert header._get_specific_labels(suffix) == labels
+
+
 def test_labels(header, labels):
     assert header.labels == labels
 
