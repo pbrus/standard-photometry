@@ -18,7 +18,7 @@ class Data(Header):
 
     def _read_data(self):
         self.__dataframe = pd.read_csv(
-            self.filename, sep="\s+", usecols=self.labels)
+            self.filename, sep=r'\s+', usecols=self.labels)
 
         return self.__dataframe
 
