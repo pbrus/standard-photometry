@@ -1,6 +1,7 @@
-import pandas as pd
 import numpy as np
-from .header import Header
+import pandas as pd
+
+from sphot.header import Header
 
 
 class Data(Header):

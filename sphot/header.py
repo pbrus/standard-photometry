@@ -1,9 +1,10 @@
 """
 The Header class transforms a list of columns to the list of labels.
 """
-import pandas as pd
 from itertools import product
-from .columns import Columns
+import pandas as pd
+
+from sphot.columns import Columns
 
 
 class Header(Columns):
