@@ -1,8 +1,8 @@
 """
 Test package of the sphot.header module.
 """
-
 import pytest
+
 from sphot.header import Header
 
 

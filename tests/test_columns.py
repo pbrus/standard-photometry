@@ -1,8 +1,8 @@
 """
 Test package of the sphot.columns module.
 """
-
 import pytest
+
 from sphot.columns import Columns
 
 
