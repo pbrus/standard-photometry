@@ -4,3 +4,4 @@ __version__ = '1.0.0'
 from . import columns
 from . import header
 from . import data
+from . import points_regression
