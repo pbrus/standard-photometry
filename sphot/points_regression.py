@@ -1,3 +1,4 @@
+from math import sqrt
 from scipy import odr
 
 
@@ -10,6 +11,13 @@ class PointsRegression:
     @staticmethod
     def regression_function(points, x):
         return points[0]*x + points[1]
+
+    @staticmethod
+    def line_point_distance(line_parameters, point_coordinates):
+        A, B = line_parameters
+        x, y = point_coordinates
+
+        return abs(A*x - y + B)/sqrt(A ** 2 + 1)
 
     def _initial_regression_parameters(self):
         result = self._odr_wrapper([0, 0])
