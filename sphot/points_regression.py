@@ -6,7 +6,7 @@ class PointsRegression:
 
     def __init__(self, points):
         self.points = points
-        self.inital_parameters = self._initial_regression_parameters()
+        self.line_parameters = self._initial_regression_parameters()
 
     @staticmethod
     def regression_function(points, x):
@@ -36,3 +36,17 @@ class PointsRegression:
             beta0=beta).run()
 
         return result
+
+    def weight_errors(self, error):
+        return 1./sqrt(error[0]**2 + error[1]**2)
+
+    def rms(self):
+        distances = [
+            PointsRegression.line_point_distance(self.line_parameters, point)**2
+            for point in zip(self.points.iloc[:, 0], self.points.iloc[:, 2])]
+        weights = [
+            self.weight_errors(error)
+            for error in zip(self.points.iloc[:, 1], self.points.iloc[:, 3])]
+        weighted_distances = [el[0]*el[1] for el in zip(weights, distances)]
+
+        return sqrt(sum(weighted_distances)/sum(weights))
