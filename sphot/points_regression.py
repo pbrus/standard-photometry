@@ -50,3 +50,6 @@ class PointsRegression:
         weighted_distances = [el[0]*el[1] for el in zip(weights, distances)]
 
         return sqrt(sum(weighted_distances)/sum(weights))
+
+    def amount(self):
+        return self.mask.sum()
