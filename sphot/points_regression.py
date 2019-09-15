@@ -1,3 +1,5 @@
+import numpy as np
+import numpy.ma as ma
 from math import sqrt
 from scipy import odr
 
@@ -6,7 +8,26 @@ class PointsRegression:
 
     def __init__(self, points):
         self.points = points
-        self.line_parameters = self._initial_regression_parameters()
+        self._mask = np.ones(len(self.points), dtype=bool)
+        self._line_parameters = self._initial_regression_parameters()
+
+    def _initial_regression_parameters(self):
+        result = self._odr_wrapper([0, 0])
+        result = self._odr_wrapper(result.beta)
+
+        return result.beta
+
+    def _odr_wrapper(self, beta):
+        result = odr.ODR(
+            odr.Data(
+                self.points.iloc[:, 0][self._mask],
+                self.points.iloc[:, 2][self._mask],
+                1./(self.points.iloc[:, 1][self._mask] ** 2),
+                1./(self.points.iloc[:, 3][self._mask] ** 2)),
+            odr.Model(PointsRegression.regression_function),
+            beta0=beta).run()
+
+        return result
 
     @staticmethod
     def regression_function(points, x):
@@ -19,21 +40,8 @@ class PointsRegression:
 
         return abs(A*x - y + B)/sqrt(A ** 2 + 1)
 
-    def _initial_regression_parameters(self):
-        result = self._odr_wrapper([0, 0])
-        result = self._odr_wrapper(result.beta)
 
-        return result.beta
 
-    def _odr_wrapper(self, beta):
-        result = odr.ODR(
-            odr.Data(
-                self.points.iloc[:, 0],
-                self.points.iloc[:, 2],
-                1./(self.points.iloc[:, 1] ** 2),
-                1./(self.points.iloc[:, 3] ** 2)),
-            odr.Model(PointsRegression.regression_function),
-            beta0=beta).run()
 
         return result
 
