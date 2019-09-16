@@ -17,6 +17,10 @@ class PointsRegression:
 
         return result.beta
 
+    def update_regression_parameters(self):
+        result = self._odr_wrapper(self._line_parameters)
+        self._line_parameters = result.beta
+
     def _odr_wrapper(self, beta):
         result = odr.ODR(
             odr.Data(
