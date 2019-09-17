@@ -55,11 +55,11 @@ class PointsRegression:
 
         return square_distances
 
+    def _calculate_weights(self):
+        return 1./np.sqrt(self.points.iloc[:, 1][self._mask] ** 2
+                          + self.points.iloc[:, 3][self._mask] ** 2)
 
-        return result
 
-    def weight_errors(self, error):
-        return 1./sqrt(error[0]**2 + error[1]**2)
 
     def rms(self):
 
