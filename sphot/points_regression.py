@@ -10,6 +10,7 @@ class PointsRegression:
         self.points = points
         self._mask = np.ones(len(self.points), dtype=bool)
         self._line_parameters = self._initial_regression_parameters()
+        self._rms = self._calculate_rms()
 
     def _initial_regression_parameters(self):
         result = self._odr_wrapper([0, 0])
@@ -59,9 +60,17 @@ class PointsRegression:
         return 1./np.sqrt(self.points.iloc[:, 1][self._mask] ** 2
                           + self.points.iloc[:, 3][self._mask] ** 2)
 
+    def _calculate_rms(self):
+        square_distances = self._calculate_square_distances()
+        weights = self._calculate_weights()
+        weighted_distances = weights*square_distances
+        self._rms = sqrt(weighted_distances.sum()/weights.sum())
 
+        return self._rms
 
+    @property
     def rms(self):
+        return self._rms
 
 
     def amount(self):
