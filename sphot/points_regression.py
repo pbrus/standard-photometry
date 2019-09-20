@@ -73,5 +73,6 @@ class PointsRegression:
         return self._rms
 
 
+    @property
     def amount(self):
-        return self.mask.sum()
+        return self._mask.sum()
