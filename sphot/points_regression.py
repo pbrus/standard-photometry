@@ -72,6 +72,16 @@ class PointsRegression:
     def rms(self):
         return self._rms
 
+    def sigma_clipping(self, sigma_factor=3.):
+        rms = self._rms
+        distances = self._calculate_square_distances()
+        distances = [sqrt(dist) for dist in distances]
+
+        for row, distance in enumerate(distances):
+            if distance > sigma_factor*rms:
+                self._mask[row] = False
+            else:
+                self._mask[row] = True
 
     @property
     def amount(self):
