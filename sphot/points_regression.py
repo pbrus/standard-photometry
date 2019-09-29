@@ -6,8 +6,10 @@ from scipy import odr
 
 class PointsRegression:
 
-    def __init__(self, points):
+    def __init__(self, points, iteration_number=0, sigma_factor=3.):
         self.__points = points
+        self.__iteration = iteration_number
+        self.__sigma_factor = sigma_factor
         self.__mask = np.ones(len(self.__points), dtype=bool)
         self.__line_parameters = self._initial_regression_parameters()
         self.__rms = self._calculate_rms()
